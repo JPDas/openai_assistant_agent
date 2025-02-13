@@ -33,7 +33,7 @@ def get_current_temperature(location, unit):
 
     base_url = "http://api.openweathermap.org/data/2.5/weather?"
 
-    WEATHER_API_KEY = "a43159052c728369ea7931fda709429c"
+    WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 
     complete_url = base_url + "appid=" + WEATHER_API_KEY + "&q=" + location
 

@@ -28,6 +28,9 @@ class Ingestion:
                             instructions= """ You are a helpful assistant that answers questions about the policies and instructions in your files. The policies and instructions are from a variety of documents. 
                                             You will answer questions from the user about the policies and instructions. All you will do is answer questions about the policies and instructions in the files and provide related information.
                                             If the user asks you a question that is not related to the policies and instructions in the files, you should let them know that you can only answer questions about the policies and instructions.
+
+                                            When asked a math question, write and run code to answer the question.
+                                            when asked the temperature or weather of the location, provide the temperature of the city or state.
                                         """,
                             model="gpt-4o-mini",
                             tools=[{"type": "file_search"}],
@@ -48,19 +51,35 @@ class Ingestion:
 
     def retrieve_files_from_assistant(self):
 
-        files = self.openai.files.list()
+        # files = self.openai.files.list()
 
-        # files = self.openai.beta.vector_stores.files.list(self.vector_store_id)
+        file_ids = []
+        file_names = []
 
-        files = files.to_dict()
+        after = None
+        while True:
+            response = self.openai.beta.vector_stores.files.list(self.vector_store_id, after=after)
 
-        data = files.get("data", [])
+            logger.info(f"retrieved files from assistant:: {response}")
+            if response.data:
+                for file_obj in response.data:
+                    file_ids.append(file_obj.id)
 
-        print(data)
-        file_list = [ file.get("filename", "") for file in data]
-        logger.info(f"Retrieve files from Vector store::{file_list}")
+                    retrieved_file = self.openai.files.retrieve(file_id=file_obj.id)
 
-        return file_list
+                    logger.info(f"Retrieved file:: {retrieved_file}")
+
+                    file_names.append(retrieved_file.filename)
+
+            if response.has_more:
+                after = response.last_id
+
+            else:
+                break
+
+        logger.info(f"Retrieve files from Vector store::{file_names}")
+        return file_ids, file_names
+        
 
     def upload_files_to_vector_store(self, present_files):
 
@@ -93,11 +112,6 @@ class Ingestion:
 
         assistant = self.openai.beta.assistants.update(
                         assistant_id=self.assistant_id,
-                        instructions="""You are a helpful assistant that answers questions about the policies and instructions in your files. The policies and instructions are from a variety of documents. 
-                            You will answer questions from the user about the policies and instructions. All you will do is answer questions about the policies and instructions in the files and provide related information.
-                            When asked a math question, write and run code to answer the question.
-                            when asked the temperature or weather of the location, provide the temperature of the city or state.
-                            """,
                         tools=[{"type": "file_search"}, {"type": "code_interpreter"}, weather_tool],
                         tool_resources={"file_search": {"vector_store_ids": [self.vector_store_id]}},
                     )
@@ -107,7 +121,7 @@ class Ingestion:
 
     def run(self):
 
-        present_files = self.retrieve_files_from_assistant()
+        _, present_files = self.retrieve_files_from_assistant()
         self.upload_files_to_vector_store(present_files)
 
         self.update_assistant()
@@ -116,6 +130,8 @@ class Ingestion:
 
 # if __name__ == "__main__":
 
-#     ingestion = Ingestion("ingested_data", assistant_id="asst_b0e8Dh6T1MiyPV80jcOz6ka4", vector_store_id="vs_67a4e54f13888191b44c151bef18c84f")
+#     ingestion = Ingestion("ingested_data", assistant_id="asst_RbtKgT73vPz2xlzlTdrHOvHK", vector_store_id="vs_67ae0ded5bf8819193a760c3598bb398")
 
-#     ingestion.run()
+#     files_id, file_names = ingestion.retrieve_files_from_assistant()
+
+#     # ingestion.upload_files_to_vector_store(files)
