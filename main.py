@@ -8,9 +8,9 @@ from search_api import Inference
 st.set_page_config(page_title="Knowledgebase OpenAI Assistant", page_icon=":books:")
 
 
-st.session_state.assistant_id = "asst_b0e8Dh6T1MiyPV80jcOz6ka4"
-st.session_state.thread_id = "thread_4lwLBP6LG2mnTo6PzO1tnTJx"
-st.session_state.vector_store_id = "vs_67a4e54f13888191b44c151bef18c84f"
+st.session_state.assistant_id = "asst_RbtKgT73vPz2xlzlTdrHOvHK"
+st.session_state.thread_id = "thread_ItZgAl34aOKteAv8SZnIfS0I"
+st.session_state.vector_store_id = "vs_67ae0ded5bf8819193a760c3598bb398"
 
 # === Sidebar - where users can upload files
 file_uploaded = st.sidebar.file_uploader(

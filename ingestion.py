@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from contextlib import ExitStack
 from loguru import logger
 
+from utility import weather_tool, get_current_temperature
+
 logger.remove() #remove the old handler. Else, the old one will work along with the new one you've added below'
 logger.add(sys.stderr, level="INFO") 
 
@@ -94,8 +96,9 @@ class Ingestion:
                         instructions="""You are a helpful assistant that answers questions about the policies and instructions in your files. The policies and instructions are from a variety of documents. 
                             You will answer questions from the user about the policies and instructions. All you will do is answer questions about the policies and instructions in the files and provide related information.
                             When asked a math question, write and run code to answer the question.
+                            when asked the temperature or weather of the location, provide the temperature of the city or state.
                             """,
-                        tools=[{"type": "file_search"}, {"type": "code_interpreter"}],
+                        tools=[{"type": "file_search"}, {"type": "code_interpreter"}, weather_tool],
                         tool_resources={"file_search": {"vector_store_ids": [self.vector_store_id]}},
                     )
         
